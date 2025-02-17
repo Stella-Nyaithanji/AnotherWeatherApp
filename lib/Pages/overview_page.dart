@@ -2,10 +2,15 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+
 import 'package:smokeless_weather/models/tomorrow_io_weather_model.dart';
 import 'package:smokeless_weather/utils/get_weather_img_name.dart';
+import 'package:smokeless_weather/widgets/daily_view.dart';
+
+import 'package:smokeless_weather/widgets/hourly_view.dart';
 
 class OverviewPage extends StatefulWidget {
   const OverviewPage({super.key});
@@ -16,16 +21,27 @@ class OverviewPage extends StatefulWidget {
 
 class _OverviewPageState extends State<OverviewPage> {
   late Future<TomorrowIoWeather> futureWeather;
+  MinutelyHourly? selectedHour;
+  Daily? selectedDay;
+
+  String shortName(Location location) {
+    List<String> nameParts = location.name.split(",");
+    if (nameParts.length < 3) {
+      return location.name;
+    }
+
+    List<String> newNameList = [nameParts.first, nameParts.last];
+    return newNameList.join(",");
+  }
+
   Future<TomorrowIoWeather> fetchWeatherData() async {
-    String url =
-        "https://api.tomorrow.io/v4/weather/forecast?location=nanyuki&apikey=929vL1pLyInK3ZRp8Hc9oA8OzeGQmIFi";
+    String url = "https://api.tomorrow.io/v4/weather/forecast?location=nanyuki&apikey=929vL1pLyInK3ZRp8Hc9oA8OzeGQmIFi";
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.
-      Map<String, dynamic> rawWeatherData =
-          jsonDecode(response.body) as Map<String, dynamic>;
+      Map<String, dynamic> rawWeatherData = jsonDecode(response.body) as Map<String, dynamic>;
 
       final weatherData = TomorrowIoWeather.fromJson(rawWeatherData);
       log(weatherData.toString());
@@ -67,9 +83,9 @@ class _OverviewPageState extends State<OverviewPage> {
               extendBodyBehindAppBar: true,
               backgroundColor: Colors.black87,
               appBar: AppBar(
-                title: const Text(
-                  'Nanyuki',
-                  style: TextStyle(
+                title: Text(
+                  shortName(weatherData.location),
+                  style: const TextStyle(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -92,209 +108,179 @@ class _OverviewPageState extends State<OverviewPage> {
                           ],
                         ),
                         borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(
-                              MediaQuery.of(context).size.width / 8),
-                          bottomRight: Radius.circular(
-                              MediaQuery.of(context).size.width / 8),
+                          bottomLeft: Radius.circular(MediaQuery.of(context).size.width / 8),
+                          bottomRight: Radius.circular(MediaQuery.of(context).size.width / 8),
                         ),
                       ),
-                      child: Center(
-                        child: Padding(
-                          padding: EdgeInsets.only(
-                              top: MediaQuery.of(context).viewPadding.top + 50),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              SizedBox(
-                                // height: 250,
-                                child: Stack(
-                                  children: [
-                                    Align(
-                                      alignment: Alignment.topCenter,
-                                      child: Text(
-                                        "Mostly Sunny",
-                                        style: TextStyle(color: Colors.white54),
-                                      ),
-                                    ),
-                                    Align(
-                                      alignment: Alignment(0, 10),
-                                      child: Text(
-                                        "24\u00B0",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 85,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      ),
-                                    ),
-                                    Align(
-                                      alignment: Alignment(0, 0.5),
-                                      child: SvgPicture.asset(
-                                        "assets/svg/weather_icons/partly-cloudy-day.svg",
-                                        width:
-                                            MediaQuery.of(context).size.width /
-                                                2,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  SizedBox(
-                                    height: 100,
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        SvgPicture.asset(
-                                          "assets/svg/weather_icons/wind-beaufort-0.svg",
-                                          width: 50,
-                                        ),
-                                        Text(
-                                          "9km/h",
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                        Text(
-                                          "Wind",
-                                          style:
-                                              TextStyle(color: Colors.white70),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: 100,
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        SvgPicture.asset(
-                                          "assets/svg/weather_icons/humidity.svg",
-                                          width: 50,
-                                        ),
-                                        Text(
-                                          "25%",
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                        Text(
-                                          "Humidity",
-                                          style:
-                                              TextStyle(color: Colors.white70),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: 100,
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      children: [
-                                        Icon(
-                                          Icons.visibility,
-                                          size: 42,
-                                          color: Colors.white54,
-                                        ),
-                                        Text(
-                                          "1.7km",
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                        Text(
-                                          "Visibility",
-                                          style:
-                                              TextStyle(color: Colors.white70),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
+                      child: selectedDay != null
+                          ? DailyView(daily: selectedDay ?? weatherData.timelines.daily.first)
+                          : HourlyView(
+                              minutelyHourly: selectedHour ?? weatherData.timelines.hourly.first,
+                            ),
                     ),
                   ),
                   Flexible(
                     flex: 1,
                     child: Container(
                       padding: EdgeInsets.fromLTRB(10, 21, 10, 10),
-                      child: Column(
+                      child: ListView(
+                        scrollDirection: Axis.vertical,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          Column(
                             children: [
-                              Text(
-                                "Today",
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 21),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  log("Clicked next 7 days");
-                                },
-                                child: Row(
-                                  children: [
-                                    Text("Next 7 Days"),
-                                    Icon(Icons.chevron_right),
-                                  ],
-                                ),
-                              )
-                            ],
-                          ),
-                          SizedBox(
-                            height: 170,
-                            child: ListView(
-                              scrollDirection: Axis.horizontal,
-                              children: [
-                                ...weatherData.timelines.hourly.map(
-                                  (e) => TextButton(
-                                    style: TextButton.styleFrom(
-                                        padding: EdgeInsets.all(8)),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Today",
+                                    style: TextStyle(color: Colors.white, fontSize: 21),
+                                  ),
+                                  TextButton(
                                     onPressed: () {
-                                      log("Pressed hour column at time ${e.time.hour}");
+                                      log("Clicked next 7 days");
                                     },
-                                    child: Container(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 5, vertical: 10),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white24,
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(17),
+                                    child: Row(
+                                      children: [
+                                        Text("Next 7 Days"),
+                                        Icon(Icons.chevron_right),
+                                      ],
+                                    ),
+                                  )
+                                ],
+                              ),
+                              SizedBox(
+                                height: 185,
+                                child: ListView(
+                                  scrollDirection: Axis.horizontal,
+                                  shrinkWrap: true,
+                                  children: [
+                                    ...weatherData.timelines.hourly.map(
+                                      (MinutelyHourly e) => TextButton(
+                                        style: TextButton.styleFrom(padding: EdgeInsets.all(8)),
+                                        onPressed: () {
+                                          log("Pressed day column at time ${e.time.hour}");
+                                          setState(() {
+                                            selectedHour = e;
+                                            selectedDay = null;
+                                          });
+                                        },
+                                        child: Container(
+                                          padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white24,
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(17),
+                                            ),
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              Text(
+                                                DateFormat.E().format(e.time),
+                                                style: TextStyle(color: Colors.white70, fontSize: 16),
+                                              ),
+                                              Text(
+                                                displayTime(e.time.hour),
+                                                style: TextStyle(color: Colors.white54, fontSize: 16),
+                                              ),
+                                              Image.asset(
+                                                "assets/img/weather_icons/${getWeatherImgName(e.minutelyHourlyValues.weatherCode)}.png",
+                                                width: 80,
+                                              ),
+                                              Text(
+                                                "${e.minutelyHourlyValues.temperature}\u00B0",
+                                                style: TextStyle(color: Colors.white, fontSize: 16),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            displayTime(e.time.hour),
-                                            style: TextStyle(
-                                                color: Colors.white54,
-                                                fontSize: 16),
+                                    )
+                                  ],
+                                ),
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "This Week",
+                                    style: TextStyle(color: Colors.white, fontSize: 21),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      log("Clicked next 7 days");
+                                    },
+                                    child: Row(
+                                      children: [
+                                        Text("Next 7 Days"),
+                                        Icon(Icons.chevron_right),
+                                      ],
+                                    ),
+                                  )
+                                ],
+                              ),
+                              SizedBox(
+                                height: 185,
+                                child: ListView(
+                                  scrollDirection: Axis.horizontal,
+                                  shrinkWrap: true,
+                                  children: [
+                                    ...weatherData.timelines.daily.map(
+                                      (Daily e) => TextButton(
+                                        style: TextButton.styleFrom(padding: EdgeInsets.all(8)),
+                                        onPressed: () {
+                                          log("Pressed day column at ${e.time}");
+                                          setState(() {
+                                            selectedDay = e;
+                                            selectedHour = null;
+                                          });
+                                        },
+                                        child: Container(
+                                          padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white24,
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(17),
+                                            ),
                                           ),
-                                          SvgPicture.asset(
-                                            "assets/svg/weather_icons/${getWeatherImgName(e.minutelyHourlyValues.weatherCode)}.png",
-                                            width: 80,
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                DateFormat.E().format(e.time), // Short weekday name (e.g., Mon, Tue)
+                                                style: TextStyle(color: Colors.white70, fontSize: 16),
+                                              ),
+                                              Text(
+                                                DateFormat.MMMd().format(e.time), // Date (e.g., Feb 13)
+                                                style: TextStyle(color: Colors.white54, fontSize: 14),
+                                              ),
+                                              Image.asset(
+                                                "assets/img/weather_icons/${getWeatherImgName(e.dailyValues.weatherCodeMax)}.png",
+                                                width: 80,
+                                              ),
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    "${e.dailyValues.temperatureMin}\u00B0",
+                                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                                  ),
+                                                  Text("/"),
+                                                  Text(
+                                                    "${e.dailyValues.temperatureApparentMax}\u00B0",
+                                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
                                           ),
-                                          Text(
-                                            "${e.minutelyHourlyValues.temperature}\u00B0",
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 16),
-                                          ),
-                                        ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          )
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ),
