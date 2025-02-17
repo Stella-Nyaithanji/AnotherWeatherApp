@@ -36,23 +36,26 @@ class DailyView extends StatelessWidget {
                     ),
                   ),
                   Align(
-                    alignment: Alignment(0, -0.5),
+                    alignment: Alignment(-1, 0.5),
                     child: Row(
                       children: [
-                        Text(
-                          "${daily.dailyValues.temperatureMax}\u00B0",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 85,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                        Text("/"),
                         Text(
                           "${daily.dailyValues.temperatureMin}\u00B0",
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 85,
+                            fontSize: 50,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        Text(
+                          "/",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        Text(
+                          "${daily.dailyValues.temperatureMax}\u00B0",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 50,
                             fontWeight: FontWeight.w400,
                           ),
                         ),
@@ -95,7 +98,10 @@ class DailyView extends StatelessWidget {
                             "${daily.dailyValues.windSpeedMin}KM/hr",
                             style: TextStyle(color: Colors.white),
                           ),
-                          Text("/"),
+                          Text(
+                            "/",
+                            style: TextStyle(color: Colors.white),
+                          ),
                           Text(
                             "${daily.dailyValues.windSpeedMax}KM/hr",
                             style: TextStyle(color: Colors.white),
@@ -125,7 +131,10 @@ class DailyView extends StatelessWidget {
                             "${daily.dailyValues.humidityMin}%",
                             style: TextStyle(color: Colors.white),
                           ),
-                          Text("/"),
+                          Text(
+                            "/",
+                            style: TextStyle(color: Colors.white),
+                          ),
                           Text(
                             "${daily.dailyValues.humidityMax}%",
                             style: TextStyle(color: Colors.white),
@@ -156,7 +165,10 @@ class DailyView extends StatelessWidget {
                             "${daily.dailyValues.visibilityMin}KM",
                             style: TextStyle(color: Colors.white),
                           ),
-                          Text("/"),
+                          Text(
+                            "/",
+                            style: TextStyle(color: Colors.white),
+                          ),
                           Text(
                             "${daily.dailyValues.visibilityMax}KM",
                             style: TextStyle(color: Colors.white),
